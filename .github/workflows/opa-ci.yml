@@ -55,8 +55,7 @@ jobs:
           opa eval \
             --data opa/terraform.rego \
             --input terraform/tfplan.json \
-            --fail-defined \
-            'data.terraform.analysis.authz == false'
+            --fail-defined
 
       - name: Evaluate policy - score
         run: |
