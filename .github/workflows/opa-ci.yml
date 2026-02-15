@@ -1,0 +1,67 @@
+name: OPA Checks
+
+on:
+  pull_request:
+    paths:
+      - "terraform/**"
+      - "opa/**"
+  workflow_dispatch:
+
+jobs:
+  opa-test:
+    name: OPA Unit Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # https://www.openpolicyagent.org/docs/cicd#github-actions-integration
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      # Failed時は、自動でexit code 0以外で止まる
+      - name: Run OPA tests
+        run: opa test opa/ -v
+
+  opa-eval:
+    name: OPA Terraform Plan Evaluation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # https://www.openpolicyagent.org/docs/cicd#github-actions-integration
+      - name: Setup OPA
+        uses: open-policy-agent/setup-opa@v2
+        with:
+          version: latest
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform Plan (JSON)
+        working-directory: terraform
+        run:  |
+          terraform plan -out=tfplan.binary
+          terraform show -json tfplan.binary > tfplan.json
+
+      # --fail-defined設定により、Failed時にexit code 0以外で止まる
+      - name: Evaluate policy - authz
+        run: |
+          opa eval \
+            --data opa/terraform.rego \
+            --input terraform/tfplan.json \
+            --fail-defined \
+            'data.terraform.analysis.authz == false'
+
+      - name: Evaluate policy - score
+        run: |
+          opa eval \
+            --data opa/terraform.rego \
+            --input terraform/tfplan.json \
+            --format pretty \
+            'data.terraform.analysis.score'
