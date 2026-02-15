@@ -1,0 +1,9 @@
+{
+    "resource_changes": [
+        {
+            "type": "aws_iam",
+            "name": "policy1",
+            "change": {"actions": ["create"]}
+        }
+    ]
+}

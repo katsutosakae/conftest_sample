@@ -1,0 +1,9 @@
+{
+    "resource_changes": [
+        {
+            "type": "aws_instance",
+            "name": "web",
+            "change": {"actions": ["create"]}
+        }
+    ]
+}

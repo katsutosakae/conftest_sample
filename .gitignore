@@ -1,0 +1,6 @@
+**/.log
+**/.opa_history
+
+**/.terraform
+**/*.tfstate.*
+**/tfplan.binary

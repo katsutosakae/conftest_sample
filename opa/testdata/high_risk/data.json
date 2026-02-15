@@ -1,0 +1,9 @@
+{
+    "resource_changes": [
+        {
+            "type": "aws_autoscaling_group",
+            "name": "asg1",
+            "change": {"actions": ["delete"]}
+        }
+    ]
+}
